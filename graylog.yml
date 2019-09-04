@@ -1,0 +1,95 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  name: Install Graylog
+  tasks:
+    - name: Replace /etc/hosts
+      template:
+        src: hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Set timezone
+      command: timedatectl set-timezone 'Europe/Berlin'
+    - name: Configure NTP
+      template:
+        src: timesyncd.conf.j2
+        dest: /etc/systemd/timesyncd.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Enable NTP
+      command: timedatectl set-ntp 1
+    - name: Install prerequisites
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - apt-transport-https
+          - openjdk-8-jre-headless
+          - uuid-runtime
+          - pwgen
+          - dirmngr
+          - curl
+
+    - name: Add MongoDB key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 9DA31620334BD75D9DCB49F368818C72E52529D4
+    - name: Add MongoDB repository
+      apt_repository:
+        repo: deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main
+    - name: Install MongoDB
+      apt:
+        name: mongodb-org
+        update_cache: yes
+    - name: Start and enable MongoDB
+      service:
+        name: mongod
+        state: started
+        enabled: yes
+
+    - name: Add Elasticsearch key
+      apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    - name: Add Elasticsearch repository
+      apt_repository:
+        repo: deb https://artifacts.elastic.co/packages/oss-6.x/apt stable main
+    - name: Install Elasticsearch
+      apt:
+        name: elasticsearch-oss
+        update_cache: yes
+    - name: Configure Elasticsearch
+      template:
+        src: elasticsearch.yml.j2
+        dest: /etc/elasticsearch/elasticsearch.yml
+        owner: root
+        group: elasticsearch
+        mode: '0660'
+    - name: Start and enable Elasticsearch
+      service:
+        name: elasticsearch
+        state: started
+        enabled: yes
+
+    - name: Add Graylog repository
+      apt:
+        deb: https://packages.graylog2.org/repo/packages/graylog-3.1-repository_latest.deb
+    - name: Install Graylog server
+      apt:
+        name: graylog-server
+        update_cache: yes
+    - name: Configure Graylog
+      template:
+        src: server.conf.j2
+        dest: /etc/graylog/server/server.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Start and enable Graylog
+      service:
+        name: graylog-server
+        state: started
+        enabled: yes

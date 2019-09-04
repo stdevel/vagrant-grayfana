@@ -1,0 +1,37 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  name: Prepare client
+  tasks:
+    - name: Replace /etc/hosts
+      template:
+        src: hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Set timezone
+      command: timedatectl set-timezone 'Europe/Berlin'
+    - name: Configure NTP
+      template:
+        src: timesyncd.conf.j2
+        dest: /etc/systemd/timesyncd.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Enable NTP
+      command: timedatectl set-ntp 1
+
+    - name: Add rsyslog configuration
+      template:
+        src: graylog.conf.j2
+        dest: /etc/rsyslog.d/rsyslog.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
+        enabled: yes
