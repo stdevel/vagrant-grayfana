@@ -6,7 +6,7 @@
   tasks:
     - name: Replace /etc/hosts
       template:
-        src: hosts.j2
+        src: files/hosts.j2
         dest: /etc/hosts
         owner: root
         group: root
@@ -14,8 +14,8 @@
     - name: Set timezone
       command: timedatectl set-timezone 'Europe/Berlin'
     - name: Configure NTP
-      template:
-        src: timesyncd.conf.j2
+      copy:
+        src: files/timesyncd.conf
         dest: /etc/systemd/timesyncd.conf
         owner: root
         group: root
@@ -33,6 +33,9 @@
           - pwgen
           - dirmngr
           - curl
+          - adduser
+          - libfontconfig1
+          - software-properties-common
 
     - name: Add MongoDB key
       apt_key:
@@ -62,8 +65,8 @@
         name: elasticsearch-oss
         update_cache: yes
     - name: Configure Elasticsearch
-      template:
-        src: elasticsearch.yml.j2
+      copy:
+        src: files/elasticsearch.yml
         dest: /etc/elasticsearch/elasticsearch.yml
         owner: root
         group: elasticsearch
@@ -82,8 +85,8 @@
         name: graylog-server
         update_cache: yes
     - name: Configure Graylog
-      template:
-        src: server.conf.j2
+      copy:
+        src: files/server.conf
         dest: /etc/graylog/server/server.conf
         owner: root
         group: root
@@ -91,5 +94,21 @@
     - name: Start and enable Graylog
       service:
         name: graylog-server
+        state: started
+        enabled: yes
+
+    - name: Add Grafana key
+      apt_key:
+        url: https://packages.grafana.com/gpg.key
+    - name: Add Grafana repository
+      apt_repository:
+        repo: deb https://packages.grafana.com/oss/deb stable main
+    - name: Install Grafana server
+      apt:
+        name: grafana
+        update_cache: yes
+    - name: Start and enable Grafana
+      service:
+        name: grafana-server
         state: started
         enabled: yes

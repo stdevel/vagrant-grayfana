@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# TODO: vbguest install!
+
 Vagrant.configure("2") do |config|
 
   # graylog VM
@@ -12,8 +14,8 @@ Vagrant.configure("2") do |config|
       vb.memory = "4096"
     end
     # forward some ports
-    graylog.vm.network "forwarded_port", guest: 9000, host: 9000   # http
-    graylog.vm.network "forwarded_port", guest: 443, host: 8443  # https
+    graylog.vm.network "forwarded_port", guest: 9000, host: 9000 # graylog
+    graylog.vm.network "forwarded_port", guest: 3000, host: 3000 # grafana
     # private network
     graylog.vm.network "private_network", ip: "192.168.1.10"
     # update system
@@ -35,8 +37,7 @@ Vagrant.configure("2") do |config|
       vb.memory = "512"
     end
     # forward some ports
-    # client.vm.network "forwarded_port", guest: 80, host: 8080   # http
-    # client.vm.network "forwarded_port", guest: 443, host: 8443  # https
+    client.vm.network "forwarded_port", guest: 80, host: 8080 # http
     # private network
     client.vm.network "private_network", ip: "192.168.1.11"
     # update system

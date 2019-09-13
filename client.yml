@@ -4,9 +4,15 @@
   gather_facts: yes
   name: Prepare client
   tasks:
+    - name: Install prerequisites
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - netcat
     - name: Replace /etc/hosts
       template:
-        src: hosts.j2
+        src: files/hosts.j2
         dest: /etc/hosts
         owner: root
         group: root
@@ -14,8 +20,8 @@
     - name: Set timezone
       command: timedatectl set-timezone 'Europe/Berlin'
     - name: Configure NTP
-      template:
-        src: timesyncd.conf.j2
+      copy:
+        src: files/timesyncd.conf
         dest: /etc/systemd/timesyncd.conf
         owner: root
         group: root
@@ -24,8 +30,8 @@
       command: timedatectl set-ntp 1
 
     - name: Add rsyslog configuration
-      template:
-        src: graylog.conf.j2
+      copy:
+        src: files/graylog.conf
         dest: /etc/rsyslog.d/rsyslog.conf
         owner: root
         group: root
@@ -35,3 +41,27 @@
         name: rsyslog
         state: restarted
         enabled: yes
+
+    - name: Install apache2
+      apt:
+        name: apache2
+        update_cache: yes
+    - name: Configure apache
+      copy:
+        src: files/000-default.conf
+        dest: /etc/apache2/sites-available/000-default.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Start and enable apache2
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+    - name: Add dummy website
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
