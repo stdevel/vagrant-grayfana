@@ -10,15 +10,15 @@ Make sure to install the following tools:
 # Scenario
 This scenario consists of two VMs based on Debian Stretch 9.x:
 - Graylog server
-  - Graylog
-  - MongoDB
-  - Elasticsearch 6.x
+  - running Graylog
+  - running MongoDB
+  - running Elasticsearch 6.x
 - Client system
   - running Apache2
   - configured to forward all syslog data to Graylog server
   - configured with dummy website and posting custom logging via GELF to Graylog
 
-![Scenario](https://raw.githubusercontent.com/stdevel/vagrant-grayfana/master/Scenario.png "Scenario")
+![Scenario](Scenario.png?raw=true "Scenario")
 
 # Usage
 Simply clone this repository or unzip the archive, open a terminal and move to the folder before entering the following command:
@@ -60,7 +60,7 @@ To do this, proceed with the following:
   - URL: ``http://localhost:9200``
   - Index name: ``graylog_0``
   - Time field name: ``timestamp``
-  - Version: ``6+`
+  - Version: ``6+``
 14. Click ``Save & Test``
 15. Import the dashboard by clicking ``Dashboard`` > ``Manage`` > ``Import`` > ``Upload .json file``
 16. Click ``Import``
@@ -73,4 +73,4 @@ $ while true; do curl http://localhost:8080; done
 
 Check-out the Graylog inputs and Grafana dashboard!
 
-![Grafana dashboard](https://raw.githubusercontent.com/stdevel/vagrant-grayfana/master/Grafana_dashboard.png "Grafana dashboard")
+![Grafana dashboard](Grafana_dashboard.png?raw=true "Grafana dashboard")
