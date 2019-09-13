@@ -1,9 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# TODO: vbguest install!
-
 Vagrant.configure("2") do |config|
+
+  # ensure to have vagrant-vbguest installed
+  required_plugins = %w( vagrant-vbguest )
+  _retry = false
+  required_plugins.each do |plugin|
+    unless Vagrant.has_plugin? plugin
+      system "vagrant plugin install #{plugin}"
+      _retry = true
+    end
+  end
+  if (_retry)
+    exec "vagrant " + ARGV.join(' ')
+  end
 
   # graylog VM
   config.vm.define "graylog" do |graylog|
@@ -20,6 +31,7 @@ Vagrant.configure("2") do |config|
     graylog.vm.network "private_network", ip: "192.168.1.10"
     # update system
     graylog.vm.provision "shell", inline: <<-SHELL
+      echo "set grub-pc/install_devices /dev/sda" | debconf-communicate
       apt-get update && apt-get upgrade -y
     SHELL
     # install graylog
@@ -42,6 +54,7 @@ Vagrant.configure("2") do |config|
     client.vm.network "private_network", ip: "192.168.1.11"
     # update system
     client.vm.provision "shell", inline: <<-SHELL
+      echo "set grub-pc/install_devices /dev/sda" | debconf-communicate
       apt-get update && apt-get upgrade -y
     SHELL
     # prepare client
