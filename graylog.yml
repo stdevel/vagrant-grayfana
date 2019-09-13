@@ -4,6 +4,13 @@
   gather_facts: yes
   name: Install Graylog
   tasks:
+    - name: Install prerequisites
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - curl
+          - netcat
     - name: Replace /etc/hosts
       template:
         src: files/hosts.j2
